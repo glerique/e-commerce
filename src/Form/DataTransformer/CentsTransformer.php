@@ -1,6 +1,6 @@
 <?php
 
-namespace App\From\DataTransformer;
+namespace App\Form\DataTransformer;
 
 use Symfony\Component\Form\DataTransformerInterface;
 
