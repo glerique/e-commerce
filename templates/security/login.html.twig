@@ -1,0 +1,18 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Connexion
+{% endblock %}
+
+{% block body %}
+
+	<h1>Connexion</h1>
+	{% if error %}
+		<div class="alert alert-danger">Une erreur est survenue, le nom d'utilisateur ou le mot de passe n'est pas valide</div>
+	{% endif %}
+	{{form_start(formView)}}
+	{{form_widget(formView)}}
+	<button type="submit" class="btn btn-primary">Connexion</button>
+
+
+	{{form_end(formView)}}
+{% endblock %}
