@@ -5,6 +5,8 @@ namespace App\Controller;
 
 use App\Entity\Product;
 use App\Form\ProductType;
+use App\Event\ProductViewEvent;
+use App\Event\ShowProductEvent;
 use App\Repository\ProductRepository;
 use App\Repository\CategoryRepository;
 use Doctrine\ORM\EntityManagerInterface;
@@ -12,6 +14,7 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\String\Slugger\SluggerInterface;
+use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 
 class ProductController extends AbstractController
@@ -35,12 +38,15 @@ class ProductController extends AbstractController
     /**
      * @Route("/{category_slug}/{slug}", name="product_show", priority=-1) 
      */
-    public function show($slug, ProductRepository $productRepository)
+    public function show($slug, ProductRepository $productRepository, EventDispatcherInterface $dispatcher)
     {
         $product = $productRepository->findOneBy(['slug' => $slug]);
         if (!$product) {
             throw $this->createNotFoundException("Ce produit n'existe pas");
         }
+
+        $productEvent = new ProductViewEvent($product);
+        $dispatcher->dispatch($productEvent, 'product.show');
 
         return $this->render(
             'product/show.html.twig',
@@ -83,7 +89,7 @@ class ProductController extends AbstractController
         $form->handleRequest($request);
         if ($form->isSubmitted() && $form->isValid()) {
 
-            $product->setSlug(strtolower($slugger->slug($product->getName())));
+            //$product->setSlug(strtolower($slugger->slug($product->getName())));
             $em->persist($product);
             $em->flush();
             return $this->redirectToRoute('product_show', ['category_slug' => $product->getCategory()->getSlug(), 'slug' => $product->getSlug()]);
